@@ -36,6 +36,6 @@ class ByteArrayValueTest {
   fun `shouldNotBeEqualToNullOrOtherType`() {
     val a = ByteArrayValue(byteArrayOf(1))
     assertNotEquals(a, null)
-    assertNotEquals<Any>(a, "string")
+    assertNotEquals(a, "string")
   }
 }
