@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -e
 
+cd "$(dirname "$0")/.."
+
 SRC_DIR="src"
 LIB_DIR="lib"
 KOTLINX_CLI_JAR="${LIB_DIR}/kotlinx-cli-jvm-0.3.5.jar"
