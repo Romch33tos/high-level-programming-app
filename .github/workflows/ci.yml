@@ -27,29 +27,36 @@ jobs:
     - name: Grant execute permission for scripts
       run: chmod +x scripts/*.sh
 
+    # --- 1. СНАЧАЛА ИНИЦИАЛИЗИРУЕМ CODEQL ---
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v3
+      with:
+        languages: java-kotlin
+        # Для Kotlin лучше использовать autobuild или manual. 
+        # Попробуем autobuild, который подхватит наш build.sh.
+        build-mode: autobuild
+
+    # --- 2. ТЕПЕРЬ СБОРКА (CodeQL будет "смотреть") ---
     - name: Build application (Fat JAR)
       run: ./scripts/build.sh
 
+    # --- 3. ТЕСТЫ ---
     - name: Run Unit Tests (JUnit)
       run: |
         ./scripts/build_tests.sh
         ./scripts/run_unit_tests.sh
 
-    # --- ДОБАВЛЕННЫЙ ШАГ ИНИЦИАЛИЗАЦИИ БД ---
     - name: Init Database
       run: ./scripts/init-db.sh
 
     - name: Run Integration Tests
       run: ./scripts/integration_test.sh
 
-    # --- CodeQL Анализ ---
-    - name: Initialize CodeQL
-      uses: github/codeql-action/init@v3
-      with:
-        languages: java-kotlin
-
+    # --- 4. АНАЛИЗ (завершаем работу CodeQL) ---
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3
+      with:
+        category: "/language:java-kotlin"
 
     # --- Telegram (Закомментировано, пока бота нету) ---
     # - name: Send Telegram Notification (Success)
