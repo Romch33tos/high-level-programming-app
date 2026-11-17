@@ -11,74 +11,95 @@ jobs:
       contents: write
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
-        with:
-          java-version: '17'
-          distribution: 'temurin'
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
 
-      - name: Install Kotlin Compiler
-        run: |
-          curl -s https://get.sdkman.io | bash
-          source "$HOME/.sdkman/bin/sdkman-init.sh"
-          sdk install kotlin
+    - name: Install Kotlin Compiler
+      run: |
+        curl -s https://get.sdkman.io | bash
+        source "$HOME/.sdkman/bin/sdkman-init.sh"
+        sdk install kotlin
 
-      - name: Grant execute permission for scripts
-        run: chmod +x scripts/*.sh
+    - name: Grant execute permission for scripts
+      run: chmod +x scripts/*.sh
 
-      - name: Build application (Fat JAR)
-        run: ./scripts/build.sh
+    - name: Build application (Fat JAR)
+      run: ./scripts/build.sh
 
-      - name: Run Unit Tests (JUnit)
-        run: |
-          ./scripts/build_tests.sh
-          ./scripts/run_unit_tests.sh
+    - name: Run Unit Tests (JUnit)
+      run: |
+        ./scripts/build_tests.sh
+        ./scripts/run_unit_tests.sh
 
-      - name: Init Database
-        run: ./scripts/init-db.sh
+    - name: Init Database
+      run: ./scripts/init-db.sh
 
-      - name: Run Integration Tests
-        run: ./scripts/integration_test.sh
+    - name: Run Integration Tests
+      run: ./scripts/integration_test.sh
 
-      - name: Build Docker image
-        run: |
-          docker build -t romch33tos/access-control-app:${{ github.sha }} .
-          docker tag romch33tos/access-control-app:${{ github.sha }} romch33tos/access-control-app:latest
+    - name: Build Docker image
+      run: |
+        docker build -t romch33tos/access-control-app:${{ github.sha }} .
+        docker tag romch33tos/access-control-app:${{ github.sha }} romch33tos/access-control-app:latest
 
-      - name: Test Docker image (Success case)
-        run: |
-          docker run --rm romch33tos/access-control-app:${{ github.sha }} --login alice --password qwerty --action read --resource A --volume 10
+    - name: Test Docker image (Success case)
+      run: |
+        docker run --rm romch33tos/access-control-app:${{ github.sha }} --login alice --password qwerty --action read --resource A --volume 10
+        EXIT_CODE=$?
+        if [ "$EXIT_CODE" -ne 0 ]; then
+          echo "Ожидался код 0, получен $EXIT_CODE"
+          exit 1
+        fi
+        echo "✅ Код 0 получен успешно"
 
-      - name: Test Docker image (Help case)
-        run: |
-          docker run --rm romch33tos/access-control-app:${{ github.sha }} --help
-          docker run --rm romch33tos/access-control-app:${{ github.sha }} --help || test $? -eq 1
+    - name: Test Docker image (Help case)
+      run: |
+        docker run --rm romch33tos/access-control-app:${{ github.sha }} --help
+        EXIT_CODE=$?
+        if [ "$EXIT_CODE" -ne 1 ]; then
+          echo "Ожидался код 1, получен $EXIT_CODE"
+          exit 1
+        fi
+        echo "✅ Код 1 получен успешно"
 
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+    - name: Test Docker image (No Access case)
+      run: |
+        docker run --rm romch33tos/access-control-app:${{ github.sha }} --login alice --password qwerty --action read --resource E --volume 10
+        EXIT_CODE=$?
+        if [ "$EXIT_CODE" -ne 5 ]; then
+          echo "Ожидался код 5, получен $EXIT_CODE"
+          exit 1
+        fi
+        echo "✅ Код 5 получен успешно"
 
-      - name: Push Docker image
-        run: |
-          docker push romch33tos/access-control-app:${{ github.sha }}
-          docker push romch33tos/access-control-app:latest
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: v1.0.${{ github.run_number }}
-          name: Release v1.0.${{ github.run_number }}
-          body: |
-            Automatic release for commit ${{ github.sha }}
-            Docker image: `romch33tos/access-control-app:${{ github.sha }}`
-          files: |
-            app.jar
-          draft: false
-          prerelease: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Push Docker image
+      run: |
+        docker push romch33tos/access-control-app:${{ github.sha }}
+        docker push romch33tos/access-control-app:latest
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: v1.0.${{ github.run_number }}
+        name: Release v1.0.${{ github.run_number }}
+        body: |
+          Automatic release for commit ${{ github.sha }}
+          Docker image: `romch33tos/access-control-app:${{ github.sha }}`
+        files: |
+          app.jar
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
