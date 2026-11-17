@@ -181,5 +181,5 @@ java -jar app.jar -h
 <p align="center">
   <img src="https://github.com/user-attachments/assets/07a14526-6ebf-4f1c-85d2-d1e741c0119a" width="450" alt="Результат тестов" /><br>
   <b>Результат тестов</b><br>
-  Все 99 тестов пройдены успешно (0 failed).
+  Все 99 тестов пройдены успешно.
 </p>
