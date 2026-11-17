@@ -50,6 +50,7 @@ jobs:
 
     - name: Test Docker image (Success case)
       run: |
+        set +e
         docker run --rm romch33tos/access-control-app:${{ github.sha }} --login alice --password qwerty --action read --resource A --volume 10
         EXIT_CODE=$?
         if [ "$EXIT_CODE" -ne 0 ]; then
@@ -60,6 +61,7 @@ jobs:
 
     - name: Test Docker image (Help case)
       run: |
+        set +e
         docker run --rm romch33tos/access-control-app:${{ github.sha }} --help
         EXIT_CODE=$?
         if [ "$EXIT_CODE" -ne 1 ]; then
@@ -70,6 +72,7 @@ jobs:
 
     - name: Test Docker image (No Access case)
       run: |
+        set +e
         docker run --rm romch33tos/access-control-app:${{ github.sha }} --login alice --password qwerty --action read --resource E --volume 10
         EXIT_CODE=$?
         if [ "$EXIT_CODE" -ne 5 ]; then
