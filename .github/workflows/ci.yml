@@ -35,6 +35,10 @@ jobs:
         ./scripts/build_tests.sh
         ./scripts/run_unit_tests.sh
 
+    # --- ДОБАВЛЕННЫЙ ШАГ ИНИЦИАЛИЗАЦИИ БД ---
+    - name: Init Database
+      run: ./scripts/init-db.sh
+
     - name: Run Integration Tests
       run: ./scripts/integration_test.sh
 
@@ -47,7 +51,7 @@ jobs:
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3
 
-    # --- Telegram (Закомментировано, пока бота нету, но скоро сделаем :3) ---
+    # --- Telegram (Закомментировано, пока бота нету) ---
     # - name: Send Telegram Notification (Success)
     #   if: success()
     #   uses: appleboy/telegram-action@master
