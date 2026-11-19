@@ -1,14 +1,12 @@
-name: CD - Release and Publish
+name: CI - Build and Test
 
 on:
-  push:
+  pull_request:
     branches: [ "master", "main" ]
 
 jobs:
-  build-and-publish:
+  build-and-test:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
 
     steps:
     - name: Checkout code
@@ -29,6 +27,12 @@ jobs:
     - name: Grant execute permission for scripts
       run: chmod +x scripts/*.sh
 
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v3
+      with:
+        languages: java-kotlin
+        build-mode: manual
+
     - name: Build application (Fat JAR)
       run: ./scripts/build.sh
 
@@ -43,66 +47,25 @@ jobs:
     - name: Run Integration Tests
       run: ./scripts/integration_test.sh
 
-    - name: Build Docker image
-      run: |
-        docker build -t romch33tos/access-control-app:${{ github.sha }} .
-        docker tag romch33tos/access-control-app:${{ github.sha }} romch33tos/access-control-app:latest
-
-    - name: Test Docker image (Success case)
-      run: |
-        set +e
-        docker run --rm romch33tos/access-control-app:${{ github.sha }} --login alice --password qwerty --action read --resource A --volume 10
-        EXIT_CODE=$?
-        if [ "$EXIT_CODE" -ne 0 ]; then
-          echo "Ожидался код 0, получен $EXIT_CODE"
-          exit 1
-        fi
-        echo "✅ Код 0 получен успешно"
-
-    - name: Test Docker image (Help case)
-      run: |
-        set +e
-        docker run --rm romch33tos/access-control-app:${{ github.sha }} --help
-        EXIT_CODE=$?
-        if [ "$EXIT_CODE" -ne 1 ]; then
-          echo "Ожидался код 1, получен $EXIT_CODE"
-          exit 1
-        fi
-        echo "✅ Код 1 получен успешно"
-
-    - name: Test Docker image (No Access case)
-      run: |
-        set +e
-        docker run --rm romch33tos/access-control-app:${{ github.sha }} --login alice --password qwerty --action read --resource E --volume 10
-        EXIT_CODE=$?
-        if [ "$EXIT_CODE" -ne 5 ]; then
-          echo "Ожидался код 5, получен $EXIT_CODE"
-          exit 1
-        fi
-        echo "✅ Код 5 получен успешно"
-
-    - name: Log in to Docker Hub
-      uses: docker/login-action@v3
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v3
       with:
-        username: ${{ secrets.DOCKERHUB_USERNAME }}
-        password: ${{ secrets.DOCKERHUB_TOKEN }}
+        category: "/language:java-kotlin"
 
-    - name: Push Docker image
-      run: |
-        docker push romch33tos/access-control-app:${{ github.sha }}
-        docker push romch33tos/access-control-app:latest
-
-    - name: Create GitHub Release
-      uses: softprops/action-gh-release@v2
+    - name: Send Telegram Notification (Success)
+      if: success()
+      continue-on-error: true
+      uses: appleboy/telegram-action@master
       with:
-        tag_name: v1.0.${{ github.run_number }}
-        name: Release v1.0.${{ github.run_number }}
-        body: |
-          Automatic release for commit ${{ github.sha }}
-          Docker image: `romch33tos/access-control-app:${{ github.sha }}`
-        files: |
-          app.jar
-        draft: false
-        prerelease: false
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        to: ${{ secrets.TELEGRAM_CHAT_ID }}
+        token: ${{ secrets.TELEGRAM_TOKEN }}
+        message: "✅ CI успешно пройден для PR #${{ github.event.pull_request.number }}"
+
+    - name: Send Telegram Notification (Failure)
+      if: failure()
+      continue-on-error: true
+      uses: appleboy/telegram-action@master
+      with:
+        to: ${{ secrets.TELEGRAM_CHAT_ID }}
+        token: ${{ secrets.TELEGRAM_TOKEN }}
+        message: "❌ CI упал для PR #${{ github.event.pull_request.number }}"
