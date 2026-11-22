@@ -2,9 +2,7 @@ package domain.service
 
 import domain.model.AccessRule
 import domain.model.ResourcePath
-import org.springframework.stereotype.Component
 
-@Component
 class EffectiveRuleResolver {
   fun resolve(rules: List<AccessRule>, login: String, path: ResourcePath): AccessRule? {
     val segments = path.segments

@@ -8,9 +8,7 @@ import application.validation.RequestValidator
 import domain.model.Action
 import domain.repository.ResourceRepository
 import domain.repository.RuleRepository
-import org.springframework.stereotype.Service
 
-@Service
 class AccessService(
   private val validator: RequestValidator,
   private val authenticator: Authenticator,

@@ -2,10 +2,8 @@ package infrastructure.security
 
 import domain.model.PasswordHash
 import domain.service.PasswordHasher
-import org.springframework.stereotype.Component
 import java.security.MessageDigest
 
-@Component
 class Sha256PasswordHasher : PasswordHasher {
   override fun hash(password: String, salt: ByteArray): ByteArray {
     val digest = MessageDigest.getInstance("SHA-256")

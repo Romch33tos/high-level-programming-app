@@ -1,9 +1,7 @@
 package presentation.cli
 
 import application.dto.AccessRequest
-import org.springframework.stereotype.Component
 
-@Component
 class CliRequestMapper {
   fun map(arguments: Map<String, String>): AccessRequest? {
     val volume = arguments[CliArgument.VOLUME.key]?.toIntOrNull() ?: return null

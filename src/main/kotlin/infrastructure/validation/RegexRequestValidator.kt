@@ -3,9 +3,7 @@ package infrastructure.validation
 import application.dto.AccessRequest
 import application.dto.AccessResult
 import application.validation.RequestValidator
-import org.springframework.stereotype.Component
 
-@Component
 class RegexRequestValidator(
   private val rules: ValidationRules
 ) : RequestValidator {

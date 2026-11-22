@@ -1,8 +1,5 @@
 package presentation.cli
 
-import org.springframework.stereotype.Component
-
-@Component
 class CliParser {
   fun parse(args: Array<String>): Map<String, String>? {
     val result = mutableMapOf<String, String>()
