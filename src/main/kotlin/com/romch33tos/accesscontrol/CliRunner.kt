@@ -20,13 +20,12 @@ class CliRunner(
   private val parser: CliParser,
   private val mapper: CliRequestMapper,
   private val service: AccessService
-) : ApplicationRunner { // <-- Изменено на ApplicationRunner
+) : ApplicationRunner {
 
   private val log = LoggerFactory.getLogger(CliRunner::class.java)
 
   override fun run(args: ApplicationArguments) {
-    // Получаем исходные аргументы без обработки Spring Boot
-    val arguments = args.sourceArgs.toList() 
+    val arguments = args.sourceArgs.toList()
 
     if (arguments.isEmpty() || arguments.contains("-h") || arguments.contains("--help")) {
       log.info("Requested help")
