@@ -11,7 +11,6 @@ import com.romch33tos.accesscontrol.presentation.cli.ExitCode
 import com.romch33tos.accesscontrol.presentation.cli.HelpPrinter
 import org.slf4j.LoggerFactory
 import org.springframework.boot.CommandLineRunner
-import org.springframework.boot.ApplicationArguments
 import org.springframework.stereotype.Component
 import kotlin.system.exitProcess
 
@@ -19,22 +18,13 @@ import kotlin.system.exitProcess
 class CliRunner(
   private val parser: CliParser,
   private val mapper: CliRequestMapper,
-  private val service: AccessService,
-  private val applicationArguments: ApplicationArguments
+  private val service: AccessService
 ) : CommandLineRunner {
 
   private val log = LoggerFactory.getLogger(CliRunner::class.java)
 
   override fun run(vararg args: String) {
-    val arguments = mutableListOf<String>()
-    applicationArguments.sourceArgs.forEach { arguments.add(it) }
-    
-    if (arguments.isEmpty()) {
-      applicationArguments.optionNames.forEach { name ->
-        arguments.add("--$name")
-        applicationArguments.getOptionValues(name)?.forEach { arguments.add(it) }
-      }
-    }
+    val arguments = args.toList()
 
     if (arguments.isEmpty() || arguments.contains("-h") || arguments.contains("--help")) {
       log.info("Requested help")
@@ -44,14 +34,14 @@ class CliRunner(
 
     val argsMap = parser.parse(arguments.toTypedArray())
     if (argsMap == null) {
-      log.warn("Failed to parse CLI arguments: $arguments")
+      log.warn("Failed to parse CLI arguments")
       HelpPrinter.print()
       exitProcess(ExitCode.BAD_FORMAT.code)
     }
 
     val request = mapper.map(argsMap)
     if (request == null) {
-      log.warn("Failed to map CLI arguments to request: $argsMap")
+      log.warn("Failed to map CLI arguments to request")
       HelpPrinter.print()
       exitProcess(ExitCode.BAD_FORMAT.code)
     }
