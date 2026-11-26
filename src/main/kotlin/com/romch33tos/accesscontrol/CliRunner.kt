@@ -10,7 +10,8 @@ import com.romch33tos.accesscontrol.presentation.cli.CliRequestMapper
 import com.romch33tos.accesscontrol.presentation.cli.ExitCode
 import com.romch33tos.accesscontrol.presentation.cli.HelpPrinter
 import org.slf4j.LoggerFactory
-import org.springframework.boot.CommandLineRunner
+import org.springframework.boot.ApplicationArguments
+import org.springframework.boot.ApplicationRunner
 import org.springframework.stereotype.Component
 import kotlin.system.exitProcess
 
@@ -19,19 +20,13 @@ class CliRunner(
   private val parser: CliParser,
   private val mapper: CliRequestMapper,
   private val service: AccessService
-) : CommandLineRunner {
+) : ApplicationRunner { // <-- Изменено на ApplicationRunner
 
   private val log = LoggerFactory.getLogger(CliRunner::class.java)
 
-  override fun run(vararg args: String) {
-    val commandLine = System.getProperty("sun.java.command") ?: ""
-    val parts = commandLine.split(" ").filter { it.isNotBlank() }
-    
-    val arguments = if (parts.size > 1 && parts[0].endsWith(".jar")) {
-      parts.drop(1)
-    } else {
-      args.toList()
-    }
+  override fun run(args: ApplicationArguments) {
+    // Получаем исходные аргументы без обработки Spring Boot
+    val arguments = args.sourceArgs.toList() 
 
     if (arguments.isEmpty() || arguments.contains("-h") || arguments.contains("--help")) {
       log.info("Requested help")
@@ -41,7 +36,7 @@ class CliRunner(
 
     val argsMap = parser.parse(arguments.toTypedArray())
     if (argsMap == null) {
-      log.warn("Failed to parse CLI arguments: $arguments")
+      log.warn("Failed to parse CLI arguments")
       HelpPrinter.print()
       exitProcess(ExitCode.BAD_FORMAT.code)
     }
