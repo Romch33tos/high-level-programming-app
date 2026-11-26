@@ -26,14 +26,14 @@ jobs:
       uses: github/codeql-action/init@v3
       with:
         languages: java-kotlin
-        build-mode: manual
+        build-mode: none
 
     - name: Build application
       run: ./mvnw -B clean package -DskipTests
 
     - name: Run Unit Tests
       run: ./mvnw -B test
-      
+
     - name: Run Integration Tests
       run: echo "Integration tests skipped"
 
