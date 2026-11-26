@@ -7,7 +7,7 @@ run_case() {
   local expected_code="$2"
   shift 2
 
-  java -jar "${JAR_NAME}" -- "$@" > /dev/null 2>&1
+  java -jar "${JAR_NAME}" "$@" > /dev/null 2>&1
   local actual_code=$?
 
   if [ "${actual_code}" -eq "${expected_code}" ]; then
