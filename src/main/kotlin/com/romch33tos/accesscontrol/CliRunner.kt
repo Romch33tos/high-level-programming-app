@@ -26,7 +26,15 @@ class CliRunner(
   private val log = LoggerFactory.getLogger(CliRunner::class.java)
 
   override fun run(vararg args: String) {
-    val arguments = applicationArguments.sourceArgs
+    val arguments = mutableListOf<String>()
+    applicationArguments.sourceArgs.forEach { arguments.add(it) }
+    
+    if (arguments.isEmpty()) {
+      applicationArguments.optionNames.forEach { name ->
+        arguments.add("--$name")
+        applicationArguments.getOptionValues(name)?.forEach { arguments.add(it) }
+      }
+    }
 
     if (arguments.isEmpty() || arguments.contains("-h") || arguments.contains("--help")) {
       log.info("Requested help")
@@ -36,14 +44,14 @@ class CliRunner(
 
     val argsMap = parser.parse(arguments.toTypedArray())
     if (argsMap == null) {
-      log.warn("Failed to parse CLI arguments")
+      log.warn("Failed to parse CLI arguments: $arguments")
       HelpPrinter.print()
       exitProcess(ExitCode.BAD_FORMAT.code)
     }
 
     val request = mapper.map(argsMap)
     if (request == null) {
-      log.warn("Failed to map CLI arguments to request")
+      log.warn("Failed to map CLI arguments to request: $argsMap")
       HelpPrinter.print()
       exitProcess(ExitCode.BAD_FORMAT.code)
     }
