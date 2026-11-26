@@ -24,7 +24,14 @@ class CliRunner(
   private val log = LoggerFactory.getLogger(CliRunner::class.java)
 
   override fun run(vararg args: String) {
-    val arguments = args.toList()
+    val commandLine = System.getProperty("sun.java.command") ?: ""
+    val parts = commandLine.split(" ").filter { it.isNotBlank() }
+    
+    val arguments = if (parts.size > 1 && parts[0].endsWith(".jar")) {
+      parts.drop(1)
+    } else {
+      args.toList()
+    }
 
     if (arguments.isEmpty() || arguments.contains("-h") || arguments.contains("--help")) {
       log.info("Requested help")
@@ -34,7 +41,7 @@ class CliRunner(
 
     val argsMap = parser.parse(arguments.toTypedArray())
     if (argsMap == null) {
-      log.warn("Failed to parse CLI arguments")
+      log.warn("Failed to parse CLI arguments: $arguments")
       HelpPrinter.print()
       exitProcess(ExitCode.BAD_FORMAT.code)
     }
