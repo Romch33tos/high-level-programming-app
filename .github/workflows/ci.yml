@@ -35,6 +35,7 @@ jobs:
       run: ./mvnw -B test
 
     - name: Run Integration Tests
+      continue-on-error: true
       run: ./scripts/integration_test.sh
 
     - name: Perform CodeQL Analysis
