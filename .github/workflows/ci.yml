@@ -22,7 +22,13 @@ jobs:
     - name: Grant execute permission for scripts
       run: chmod +x mvnw scripts/*.sh
 
-    - name: Build application (skip tests)
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v3
+      with:
+        languages: java-kotlin
+        build-mode: manual
+
+    - name: Build application
       run: ./mvnw -B clean package -DskipTests
 
     - name: Run Unit Tests
@@ -30,6 +36,11 @@ jobs:
 
     - name: Run Integration Tests
       run: ./scripts/integration_test.sh
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v3
+      with:
+        category: "/language:java-kotlin"
 
     - name: Send Telegram Notification (Success)
       if: success()
