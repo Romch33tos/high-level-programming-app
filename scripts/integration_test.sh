@@ -7,7 +7,7 @@ run_case() {
   local expected_code="$2"
   shift 2
 
-  java -jar "${JAR_NAME}" "$@" > /dev/null 2>&1
+  java -jar "${JAR_NAME}" -- "$@" > /dev/null 2>&1
   local actual_code=$?
 
   if [ "${actual_code}" -eq "${expected_code}" ]; then
@@ -19,7 +19,7 @@ run_case() {
 }
 
 if [ ! -f "${JAR_NAME}" ]; then
-  echo "Сначала выполните ./scripts/build.sh"
+  echo "Сначала выполните ./mvnw clean package -DskipTests"
   exit 1
 fi
 
