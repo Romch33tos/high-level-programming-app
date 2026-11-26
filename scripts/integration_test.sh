@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-JAR_NAME=$(ls target/access-control-app-*.jar | head -n1)
+JAR_NAME="target/access-control-app-1.0.0.jar"
 
 run_case() {
   local description="$1"
