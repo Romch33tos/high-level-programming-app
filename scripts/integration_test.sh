@@ -7,7 +7,6 @@ run_case() {
   local expected_code="$2"
   shift 2
 
-  # Добавлен -- для отделения аргументов Spring Boot от аргументов приложения
   java -jar "${JAR_NAME}" -- "$@" > /dev/null 2>&1
   local actual_code=$?
 
