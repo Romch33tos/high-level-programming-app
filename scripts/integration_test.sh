@@ -1,14 +1,13 @@
 #!/usr/bin/env bash
 
-JAR_NAME="app.jar"
-KOTLINX_CLI_JAR="lib/kotlinx-cli-jvm-0.3.5.jar"
+JAR_NAME=$(ls target/access-control-app-*.jar | head -n1)
 
 run_case() {
   local description="$1"
   local expected_code="$2"
   shift 2
 
-  java -cp "${JAR_NAME}:${KOTLINX_CLI_JAR}" MainKt "$@" > /dev/null 2>&1
+  java -jar "${JAR_NAME}" -- "$@" > /dev/null 2>&1
   local actual_code=$?
 
   if [ "${actual_code}" -eq "${expected_code}" ]; then
@@ -20,7 +19,7 @@ run_case() {
 }
 
 if [ ! -f "${JAR_NAME}" ]; then
-  echo "Сначала выполните ./build.sh"
+  echo "Сначала выполните ./scripts/build.sh"
   exit 1
 fi
 
