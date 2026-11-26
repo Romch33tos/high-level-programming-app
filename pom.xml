@@ -62,13 +62,6 @@
       <artifactId>kotlin-test-junit5</artifactId>
       <scope>test</scope>
     </dependency>
-
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>${project.artifactId}</artifactId>
-      <version>${project.version}</version>
-      <scope>test</scope>
-    </dependency>
   </dependencies>
 
   <build>
@@ -100,6 +93,13 @@
             <goals>
               <goal>test-compile</goal>
             </goals>
+            <!-- Вот эта настройка решает проблему! -->
+            <configuration>
+              <sourceDirs>
+                <sourceDir>${project.basedir}/src/test/kotlin</sourceDir>
+                <sourceDir>${project.build.outputDirectory}</sourceDir>
+              </sourceDirs>
+            </configuration>
           </execution>
         </executions>
         <dependencies>
